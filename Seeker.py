@@ -43,21 +43,28 @@ connection_db = sqlite3.connect("raw_material.db")
 cursor = connection_db.cursor()
 
 formulation = []
-
-i = True
-while i :
-    cosing = ingredient_research(cursor)
-    v = float(input("Enter the desired volume (mL) : "))
-    formulation.append([cosing, v])
-    i = str(input("Enter 'yes' if you want to enter a new raw materiel or 'no' if you doesn't want to add a new one : "))
-    if i != "yes" :
-        i = False
-
-show_formulation (formulation, cursor)
-save = str(input("Enter 'yes' if you want to save you're formulation into a csv file or 'no' if you doesn't want to save : "))
-if save == "yes":
-    save_formulation (formulation, cursor, "formulation.csv")
-else:
-    print("formulation not saved.")
-   
+j = True
+while j :
+    i = True
+    while i :
+        cosing = ingredient_research(cursor)
+        v = float(input("Enter the desired volume (mL) : "))
+        formulation.append([cosing, v])
+        i = str(input("Enter 'yes' if you want to enter a new raw materiel or 'no' if you doesn't want to add a new one : "))
+        if i != "yes" :
+            i = False
+    
+    show_formulation (formulation, cursor)
+    save = str(input("Enter 'yes' if you want to save your formulation into a csv file or 'no' if you doesn't want to save : "))
+    if save == "yes":
+        save_formulation (formulation, cursor, "formulation.csv")
+    else:
+        print("formulation not saved.")
+        
+    j = str(input("Enter 'yes' if you want to make a new formulation or 'no' if you doesn't want to make a new one : "))
+    if j != "yes" :
+       j = False
+    else :
+       formulation = []
+       
 connection_db.close()
