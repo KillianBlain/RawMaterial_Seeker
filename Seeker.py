@@ -5,36 +5,41 @@ from tkinter import *
 import os
 
 def formulation_creation():
-    connection_db = sqlite3.connect("raw_material.db")
-    cursor = connection_db.cursor()
+    
     formulation = []
-    intro = Label(widget, text='Creating a new formulation', fg='black')
-    intro.grid()
-    i = True
-    while i :
-        ingredient_property = Label(widget, text="Enter the researched property of your raw material :", fg='black')
-        ingredient_property.grid()
-        ingredient_property = Entry(widget)
-        ingredient_property.grid()
-        button = Button(widget, text = "research", command = ingredient_research(ingredient_property))
-        button.grid()
-        cosing = Label(widget, text="Enter the COSING number of the chosen raw material :", fg='black')
-        cosing.grid()
-        cosing = Entry(widget)
-        cosing.grid()
-        button2 = Button(widget, text = "add ingredient to formulation", command = add_form())
-        button2.grid()
+    
+    intro_text = Label(widget, text='Creating a new formulation', fg='black')
+    intro_text.grid()
+    
+    ingredient_property_label = Label(widget, text="Enter the researched property of your raw material :", fg='black')
+    ingredient_property_label.grid()
+    ingredient_property_entry = Entry(widget)
+    ingredient_property_entry.grid()
+    research_button = Button(widget, text = "start research", command = lambda : ingredient_research)
+    research_button.grid()
+    
+    cosing_label = Label(widget, text="Enter the COSING number of the chosen raw material :", fg='black')
+    cosing_label.grid()
+    cosing_entry = Entry(widget)
+    cosing_entry.grid()
+    adding_button = Button(widget, text = "add ingredient to formulation", command = add_form)
+    adding_button.grid()
+
+def add_to_formulation():
+    cosing_value = cosing_entry.get()
+    if cosing_value:
+        formulation.append(cosing_value)
+        print("Current formulation:", formulation)
 
 def ingredient_research(ingredient_property):
-    connection_db = sqlite3.connect("raw_material.db")
-    cursor = connection_db.cursor()
-    ingredient_property = f"%{ingredient_property}%" #f-string function to add % around ingredient_property
-    cosing = cursor.execute("SELECT COSING_Ref_No, INCI_name FROM INGREDIENTS WHERE Chem_IUPACName_Description LIKE ?", (ingredient_property,))
-    line = cursor.fetchone()
-    while line:
-        line.grid()
-        line = cursor.fetchone()
-    connection_db.close()
+   connection_db = sqlite3.connect("raw_material.db")
+   cursor = connection_db.cursor()
+   ingredient_property = f"%{ingredient_property}%" #f-string function to add % around ingredient_property
+   cursor.execute("SELECT COSING_Ref_No, INCI_name FROM INGREDIENTS WHERE Chem_IUPACName_Description LIKE ?", (ingredient_property,))
+    
+   for line in cursor.fetchall():
+       result_label = Label(widget, text=f"{line[0]} - {line[1]}")
+       result_label.grid()
     
 def add_form():
     formulation.append(cosing)
@@ -104,50 +109,44 @@ def deconnection_db():
     connection_db.close()
     print("database raw_material.db deconnected")
 
-# Création de la fenêtre
+# Create the main window
 window = Tk()
-window.title("Raw_Material_Seeker")
+window.title("Raw Material Seeker")
 window.geometry("800x500")
 
-# Création du cadre-conteneur pour les menus
-zoneMenu = Frame(window, borderwidth=3, bg='#557788')
-zoneMenu.grid(row=0,column=0)
+# Create the menu frame
+zone_menu = Frame(window, borderwidth=3, bg='#557788')
+zone_menu.grid(row=0, column=0)
 
-# Création de la zone widget
+# Create the widget frame
 widget = Frame(window)
 widget.grid()
 
-# Création de l'onglet Fichier
-folder_menu = Menubutton(zoneMenu, text='Fichier', width='20', borderwidth=2, bg='gray', activebackground='darkorange',relief = RAISED)
-folder_menu.grid(row=0,column=0)
+# Menu buttons
+folder_menu = Menubutton(zone_menu, text='File', width='20', borderwidth=2, bg='gray', activebackground='darkorange', relief=RAISED)
+folder_menu.grid(row=0, column=0)
 
-# Création de l'onglet database
-data_base_menu = Menubutton(zoneMenu, text='Base de données', width='20', borderwidth=2, bg='gray', activebackground='darkorange',relief = RAISED)
-data_base_menu.grid(row=0,column=1)
+#folder menu
+folder_menu_roll = Menu(folder_menu)
+folder_menu_roll.add_command(label='Create a formulation', command=formulation_creation)
+folder_menu_roll.add_command(label='Save formulation', command=save_formulation)
+folder_menu_roll.add_command(label="Add a material to db")
+folder_menu_roll.add_command(label="Delete a material from db")
+folder_menu_roll.add_separator()
+folder_menu_roll.add_command(label='Quit', command=quit_program)
+folder_menu.configure(menu=folder_menu_roll)
+
+#db menu
+data_base_menu = Menubutton(zone_menu, text='Database', width='20', borderwidth=2, bg='gray', activebackground='darkorange', relief=RAISED)
+data_base_menu.grid(row=0, column=1)
 data_base_roll = Menu(data_base_menu)
-data_base_roll.add_command(label='Connect a database', command = connection_db)
-data_base_roll.add_command(label='Disconnect a database', command = deconnection_db)
-
-# Création de l'onglet Format
-menuFormat = Menubutton(zoneMenu, text='Format', width='20', borderwidth=2, bg='gray', activebackground='darkorange',relief = RAISED)
-menuFormat.grid(row=0,column=2)
-
-# Création d'un menu défilant
-menuDeroulant1 = Menu(folder_menu)
-menuDeroulant1.add_command(label='Create a formulation', command = formulation_creation)
-menuDeroulant1.add_command(label="Add a material")
-menuDeroulant1.add_command(label="Save formulation", command = save_formulation)
-menuDeroulant1.add_separator()
-menuDeroulant1.add_command(label="Quit", command = quit_program)
-
-# Attribution du menu déroulant au menu Affichage
-folder_menu.configure(menu=menuDeroulant1)
+data_base_roll.add_command(label='Connect to database', command=connection_db)
+data_base_roll.add_command(label='Disconnect from database', command=deconnection_db)
 data_base_menu.configure(menu=data_base_roll)
 
-#Ajout d'une phrase de bienvenue
-titre = Label(widget, text="Welcome to the raw_material_seeker !")
-titre.grid()
+# Welcome message
+title_label = Label(widget, text="Welcome to the Raw Material Seeker!")
+title_label.grid()
 
-# boucle tkinter (doit rester à la fin)
+# Run the Tkinter main loop
 window.mainloop()
-       
