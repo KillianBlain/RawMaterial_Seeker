@@ -2,7 +2,6 @@ import sqlite3
 import matplotlib.pyplot as plt
 import csv
 from tkinter import *
-import os
 
 formulation = []
 
@@ -15,14 +14,25 @@ def formulation_creation():
         ingredient_property_value = f"%{ingredient_property_value}%" #f-string function to add % around ingredient_property
         cursor.execute("SELECT COSING_Ref_No, INCI_name FROM INGREDIENTS WHERE Chem_IUPACName_Description LIKE ?", (ingredient_property_value,))
         
+        #Frame for the research widget
+        research_widget = Frame(window, borderwidth=10, relief=GROOVE, width=420, height=400)
+        research_widget.place(x=350, y=35)
+        research_widget.pack_propagate(False) #lock width and height from the Frame
+        text = Label(research_widget, text='Results founds in database', fg='red')
+        text.pack()
+        
         for line in cursor.fetchall():
-            result_label = Label(widget, text=f"{line[0]} - {line[1]}")
+            result_label = Label(research_widget, text=f"{line[0]} - {line[1]}")
             result_label.pack()
     
-    title_label.pack_forget()#delete the welcome message
+    welcome_label.pack_forget()#delete the welcome message
+    
+    # Create the widget frame
+    widget = Frame(window, borderwidth=10, relief = GROOVE)
+    widget.place(x=5, y=35)
     
     intro_frame = Frame(widget, borderwidth=2, relief = GROOVE)
-    intro_frame.place(x='200',y='400')
+    intro_frame.pack(pady=5)
     intro_text = Label(intro_frame, text='Creating a new formulation', fg='black')
     intro_text.pack()
     
@@ -154,10 +164,6 @@ window.resizable(height=False,width=False) #main window is not resizable
 zone_menu = Frame(window, borderwidth=0, bg='#557788')
 zone_menu.pack(side=TOP, anchor="w", fill=X)  # Place the menu frame at the top-left
 
-# Create the widget frame
-widget = Frame(window)
-widget.pack()
-
 #folder menu
 folder_menu = Menubutton(zone_menu, text='File', width='20', borderwidth=2, bg='gray', activebackground='darkorange', relief=RAISED)
 folder_menu.pack(side=LEFT, padx=0, pady=0)  # Place File button to the left
@@ -181,8 +187,8 @@ data_base_roll.add_command(label='Disconnect from database', command=deconnectio
 data_base_menu.configure(menu=data_base_roll)
 
 # Welcome message
-title_label = Label(window, text="Welcome to the Raw Material Seeker!")
-title_label.pack()
+welcome_label = Label(window, text="Welcome to the Raw Material Seeker!")
+welcome_label.pack()
 
 # Run the Tkinter main loop
 window.mainloop()
