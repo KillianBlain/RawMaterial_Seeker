@@ -25,6 +25,11 @@ def formulation_creation():
             result_label = Label(research_widget, text=f"{line[0]} - {line[1]}")
             result_label.pack()
     
+    def add_to_formulation():
+        cosing_value = cosing_entry.get()
+        formulation.append(cosing_value)
+        print("Current formulation:", formulation)
+    
     welcome_label.pack_forget()#delete the welcome message
     
     # Create the widget frame
@@ -52,16 +57,10 @@ def formulation_creation():
     cosing_label.pack()
     cosing_entry = Entry(cosing_frame)
     cosing_entry.pack(padx=10)
-    adding_button = Button(cosing_frame, text = "add ingredient to formulation")
+    adding_button = Button(cosing_frame, text = "add ingredient to formulation", command = add_to_formulation)
     adding_button.pack(pady=10)
     
     widget.mainloop()
-
-def add_to_formulation():
-    cosing_value = cosing_entry.get()
-    if cosing_value:
-        formulation.append(cosing_value)
-        print("Current formulation:", formulation)
     
 def ingredient_research_fonctionnelle_sans_affichage():
     connection_db = sqlite3.connect("raw_material.db")
@@ -84,36 +83,6 @@ def ingredient_research_fonctionnelle_sans_affichage():
         if i != "yes" :
             i = False
     return formulation
-    
-def add_form():
-    formulation.append(cosing)
-    formulation.pack()
-    return formulation
-
-def ingredient_research_fonctionnelle_sans_affichage():
-    connection_db = sqlite3.connect("raw_material.db")
-    cursor = connection_db.cursor()
-    formulation = []
-    i = True
-    while i :
-        ingredient_property = str(input("Enter the researched property of your raw material : ")) 
-        ingredient_property = f"%{ingredient_property}%" #f-string function to add % around ingredient_property
-        cosing = cursor.execute("SELECT COSING_Ref_No, INCI_name FROM INGREDIENTS WHERE Chem_IUPACName_Description LIKE ?", (ingredient_property,))
-        line = cursor.fetchone()
-        while line:
-            print(line)
-            line = cursor.fetchone()
-        cosing = str(input("Enter the COSING number of the chosen raw material : "))
-        v = float(input("Enter the desired volume (mL) : "))
-        formulation.append([cosing, v])
-        print(formulation)
-        i = str(input("Enter 'yes' if you want to enter a new raw materiel or 'no' if you doesn't want to add a new one : "))
-        if i != "yes" :
-            i = False
-    return formulation
-
-def recupere():
-    showinfo("Alerte", entree.get())
 
 def show_formulation (formulation, cursor) :
     nom_tranches = []
