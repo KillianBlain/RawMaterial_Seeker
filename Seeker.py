@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import csv
 from tkinter import *
 
-formulation = []
-
 def formulation_creation():
+    
+    formulation = []
+    frame_add = [] #stocking of formulation_frame
     
     def ingredient_research():
         ingredient_property_value = ingredient_property_entry.get()
@@ -26,9 +27,26 @@ def formulation_creation():
             result_label.pack()
     
     def add_to_formulation():
+        
+        #creating a new frame for showing the formulation and deleting the old one if existing (stocked into frame_add list)
+        for formulation_frame in frame_add:
+           formulation_frame.pack_forget()
+        formulation_frame = Frame(widget)
+        formulation_frame.pack()
+        frame_add.append(formulation_frame)
+        
         cosing_value = cosing_entry.get()
-        formulation.append(cosing_value)
-        print("Current formulation:", formulation)
+        volume_value = volume_entry.get()
+        
+        if cosing_value and volume_value :
+            formulation.append([cosing_value, volume_value])
+            print("Current formulation:", formulation)
+            for line in formulation:
+                formulation_result_label = Label(formulation_frame, text=f"{line[0]} - {line[1]}")
+                formulation_result_label.pack()
+        else : 
+            missing = Label(formulation_frame, text = 'Missing cosing number or volume')
+            missing.pack()
     
     welcome_label.pack_forget()#delete the welcome message
     
@@ -57,11 +75,13 @@ def formulation_creation():
     cosing_label.pack()
     cosing_entry = Entry(cosing_frame)
     cosing_entry.pack(padx=10)
+    text_volume = Label(cosing_frame, text="Enter the desired volume of your chosen material (mL) :", fg='black')
+    text_volume.pack()
+    volume_entry = Entry(cosing_frame)
+    volume_entry.pack(padx=10)
     adding_button = Button(cosing_frame, text = "add ingredient to formulation", command = add_to_formulation)
     adding_button.pack(pady=10)
-    
-    widget.mainloop()
-    
+
 def ingredient_research_fonctionnelle_sans_affichage():
     connection_db = sqlite3.connect("raw_material.db")
     cursor = connection_db.cursor()
@@ -115,12 +135,12 @@ def quit_program():
 
 def connection_db():
     connection_db = sqlite3.connect("raw_material.db")
-    print("database raw_material.db connected")
+    print("database raw_material.db successfully connected")
     return connection_db
     
 def deconnection_db():
     connection_db.close()
-    print("database raw_material.db deconnected")
+    print("database raw_material.db successfully deconnected")
 
 # Create the main window
 window = Tk()
