@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import csv
 from tkinter import *
 
+formulation = []
+
 def formulation_creation():
     
-    formulation = []
     frame_add = [] #stocking of formulation_frame
     
     def ingredient_research():
@@ -19,13 +20,34 @@ def formulation_creation():
         research_widget = Frame(window, borderwidth=10, relief=GROOVE, width=420, height=400)
         research_widget.place(x=350, y=35)
         research_widget.pack_propagate(False) #lock width and height from the Frame
-        text = Label(research_widget, text='Results founds in database', fg='red')
-        text.pack()
         
-        for line in cursor.fetchall():
-            result_label = Label(research_widget, text=f"{line[0]} - {line[1]}")
-            result_label.pack()
-    
+        scrollbar = Scrollbar(research_widget, orient=VERTICAL)
+        scrollbar.pack(side = RIGHT, fill = Y)
+        
+        text_widget = Text(research_widget, yscrollcommand=scrollbar.set, wrap=WORD, width=50, height=20)
+        text_widget.pack(side=LEFT, fill=BOTH, expand = True)
+        
+        scrollbar.config(command=text_widget.yview)
+        
+        results = cursor.fetchall()
+        
+        if results : 
+            
+            text_widget.tag_config("underline", underline=True)
+            text_widget.insert(END,'Results founds in database:\n\n', "underline")
+            
+            for line in results:
+                
+                text_widget.insert(END, f"{line[0]} - {line[1]}\n")
+                
+        else :
+            
+            text_widget.tag_config("underline", underline=True)
+            text_widget.tag_config("highlight", foreground="red")
+            text_widget.insert(END, 'No results found in database. Please retry.\n', ("underline", "highlight"))
+        
+        text_widget.config(state=DISABLED)
+        
     def add_to_formulation():
         
         #creating a new frame for showing the formulation and deleting the old one if existing (stocked into frame_add list)
@@ -34,6 +56,8 @@ def formulation_creation():
         formulation_frame = Frame(widget)
         formulation_frame.pack()
         frame_add.append(formulation_frame)
+        current_formulation_label = Label(formulation_frame, text = 'Current formulation :', fg='blue', font='bold')
+        current_formulation_label.pack()
         
         cosing_value = cosing_entry.get()
         volume_value = volume_entry.get()
@@ -52,7 +76,7 @@ def formulation_creation():
     
     # Create the widget frame
     widget = Frame(window, borderwidth=10, relief = GROOVE)
-    widget.place(x=5, y=35)
+    widget.place(x=15, y=35)
     
     intro_frame = Frame(widget, borderwidth=2, relief = GROOVE)
     intro_frame.pack(pady=5)
@@ -118,18 +142,47 @@ def show_formulation (formulation, cursor) :
         plt.title("Composition of the formulation")
         plt.show()
 
-def save_formulation (formulation, cursor, filename):
-    with open(filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["COSING_Ref_No", "INCI_name", "Function", "Volume (ml)"])
-        for ingredient in formulation:
-            requete = 'SELECT INCI_name, Function FROM INGREDIENTS WHERE COSING_Ref_No = ' + ingredient [0] ;
-            cursor.execute(requete)
-            elt = cursor.fetchone()
-            if elt:
-                writer.writerow([ingredient[0], elt[0], elt[1], ingredient[1]])
-    print("Formulation saved into",filename,".")
+def save_formulation ():
     
+    def save() :
+        connection_db = sqlite3.connect("raw_material.db")
+        cursor = connection_db.cursor()
+        file_name = save_entry.get()
+        file_name += ".csv"
+        with open(file_name, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["COSING_Ref_No", "INCI_name", "Function", "Volume (ml)"])
+            for ingredient in formulation:
+                requete = 'SELECT INCI_name, Function FROM INGREDIENTS WHERE COSING_Ref_No = ' + ingredient [0] ;
+                cursor.execute(requete)
+                elt = cursor.fetchone()
+                if elt:
+                    writer.writerow([ingredient[0], elt[0], elt[1], ingredient[1]])
+        print("Formulation saved into",file_name,".")
+        save_widget.pack_forget()
+        
+    def cancel():
+        save_widget.pack_forget()
+        
+    save_widget = Frame(window, borderwidth=3, relief=GROOVE, width=200, height=100)
+    save_widget.pack(padx=0, pady=50)
+    save_widget.pack_propagate(False) #lock width and height from the Frame
+    
+    save_label = Label(save_widget, text= 'Enter file name', fg='black', font='bold')
+    save_label.pack()
+    
+    save_entry = Entry(save_widget, fg='purple', font='bold')
+    save_entry.pack()
+    
+    button_frame = Frame(save_widget)
+    button_frame.pack(side=BOTTOM)
+    
+    save_button= Button(button_frame, text='Save', command = save, fg='darkgreen', font='bold')
+    save_button.pack(padx=10, pady=10, side=LEFT)
+    
+    cancel_button= Button(button_frame, text='Cancel', command = cancel, fg='darkred', font='bold')
+    cancel_button.pack(padx=10, pady=10, side=RIGHT)
+
 def quit_program():
     window.destroy()
 
@@ -164,7 +217,7 @@ folder_menu_roll.add_command(label='Save formulation', command=save_formulation)
 folder_menu_roll.add_command(label="Add a material to db")
 folder_menu_roll.add_command(label="Delete a material from db")
 folder_menu_roll.add_separator()
-folder_menu_roll.add_command(label='Quit', command=quit_program)
+folder_menu_roll.add_command(label='Quit Raw_Material_Seeker', command=quit_program)
 folder_menu.configure(menu=folder_menu_roll)
 
 #db menu
