@@ -17,7 +17,7 @@ def formulation_creation():
         cursor.execute("SELECT COSING_Ref_No, INCI_name FROM INGREDIENTS WHERE Chem_IUPACName_Description LIKE ?", (ingredient_property_value,))
         
         #Frame for the research widget
-        research_widget = Frame(window, borderwidth=10, relief=GROOVE, width=420, height=400)
+        research_widget = Frame(window, borderwidth=2, relief=GROOVE, width=420, height=400)
         research_widget.place(x=350, y=35)
         research_widget.pack_propagate(False) #lock width and height from the Frame
         
@@ -35,6 +35,7 @@ def formulation_creation():
             
             text_widget.tag_config("underline", underline=True)
             text_widget.insert(END,'Results founds in database:\n\n', "underline")
+            text_widget.insert(END,'Cosing number - INCI name\n\n')
             
             for line in results:
                 
@@ -58,6 +59,7 @@ def formulation_creation():
         frame_add.append(formulation_frame)
         current_formulation_label = Label(formulation_frame, text = 'Current formulation :', fg='blue', font='bold')
         current_formulation_label.pack()
+        informations_label = Label(formulation_frame, text = 'Cosing number - Volume (mL)').pack()
         
         cosing_value = cosing_entry.get()
         volume_value = volume_entry.get()
@@ -75,7 +77,7 @@ def formulation_creation():
     welcome_label.pack_forget()#delete the welcome message
     
     # Create the widget frame
-    widget = Frame(window, borderwidth=10, relief = GROOVE)
+    widget = Frame(window, borderwidth=2, relief = GROOVE)
     widget.place(x=15, y=35)
     
     intro_frame = Frame(widget, borderwidth=2, relief = GROOVE)
