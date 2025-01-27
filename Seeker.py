@@ -108,42 +108,6 @@ def formulation_creation():
     adding_button = Button(cosing_frame, text = "add ingredient to formulation", command = add_to_formulation)
     adding_button.pack(pady=10)
 
-def ingredient_research_fonctionnelle_sans_affichage():
-    connection_db = sqlite3.connect("raw_material.db")
-    cursor = connection_db.cursor()
-    formulation = []
-    i = True
-    while i :
-        ingredient_property = str(input("Enter the researched property of your raw material : ")) 
-        ingredient_property = f"%{ingredient_property}%" #f-string function to add % around ingredient_property
-        cosing = cursor.execute("SELECT COSING_Ref_No, INCI_name FROM INGREDIENTS WHERE Chem_IUPACName_Description LIKE ?", (ingredient_property,))
-        line = cursor.fetchone()
-        while line:
-            print(line)
-            line = cursor.fetchone()
-        cosing = str(input("Enter the COSING number of the chosen raw material : "))
-        v = float(input("Enter the desired volume (mL) : "))
-        formulation.append([cosing, v])
-        print(formulation)
-        i = str(input("Enter 'yes' if you want to enter a new raw materiel or 'no' if you doesn't want to add a new one : "))
-        if i != "yes" :
-            i = False
-    return formulation
-
-def show_formulation (formulation, cursor) :
-    nom_tranches = []
-    taille_tranches = []
-    for ingredient in formulation :
-        requete = 'SELECT INCI_name, Function FROM INGREDIENTS WHERE COSING_Ref_No = ' + ingredient [0] ;
-        cursor.execute(requete)
-        elt = cursor.fetchone()
-        nom_tranches.append (elt [0] + " (" + ingredient [0] + ")")
-        taille_tranches.append (ingredient [1])
-        print ("- ", ingredient [1], "ml de ", elt [0], "(",elt [1], ") [", ingredient [0], "]")
-        plt.pie(taille_tranches, labels = nom_tranches, autopct = "%1.1f%%")
-        plt.title("Composition of the formulation")
-        plt.show()
-
 def save_formulation ():
     
     def save() :
@@ -231,8 +195,8 @@ data_base_roll.add_command(label='Disconnect from database', command=deconnectio
 data_base_menu.configure(menu=data_base_roll)
 
 # Welcome message
-welcome_label = Label(window, text="Welcome to the Raw Material Seeker!")
-welcome_label.pack()
+welcome_label = Label(window, text="Welcome to the Raw Material Seeker !", bg='white', font=20)
+welcome_label.pack(side=TOP, pady=200)
 
 # Run the Tkinter main loop
 window.mainloop()
